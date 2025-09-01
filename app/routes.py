@@ -1,9 +1,27 @@
 import requests
+import boto3
+import json
+from datetime import datetime
 from flask import Blueprint, render_template, request
 
 main = Blueprint('main', __name__)
 
 API_KEY = "c1231ea55d2c043fce682386b5151ce6"
+
+# --- S3 Setup ---
+s3 = boto3.client('s3')
+BUCKET_NAME = "weather-data-primary"
+
+def upload_weather_to_s3(weather_data, city):
+    """Uploads weather data JSON to S3 with timestamped filename."""
+    file_name = f"{city}_{datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S')}.json"
+    s3.put_object(
+        Bucket=BUCKET_NAME,
+        Key=file_name,
+        Body=json.dumps(weather_data),
+        ContentType="application/json"
+    )
+    print(f"✅ Uploaded {file_name} to S3")
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -27,7 +45,12 @@ def index():
                 'description': data['weather'][0]['description'],
                 'icon': data['weather'][0]['icon']
             }
+
+            # Upload to S3
+            upload_weather_to_s3(weather, city)
+
         else:
             weather = 'not found'
 
     return render_template('index.html', weather=weather)
+
