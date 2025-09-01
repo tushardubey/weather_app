@@ -29,28 +29,26 @@ pipeline {
     }
 
     stage('Deploy to EC2s') {
-    steps {
+      steps {
         sshagent (credentials: ['weather-app-ssh']) {
-            sh '''
-                ssh -o StrictHostKeyChecking=no ubuntu@3.80.218.77"
-                    docker pull tushardubey/weather_app:latest &&
-                    docker stop weather_app || true &&
-                    docker rm weather_app || true &&
-                    docker run -d --name weather_app -p 5000:5000 tushardubey/weather_app:latest
-                "
+          sh '''
+            ssh -o StrictHostKeyChecking=no ubuntu@3.80.218.77 "
+              docker pull tushardubey/weather_app:latest &&
+              docker stop weather_app || true &&
+              docker rm weather_app || true &&
+              docker run -d --name weather_app -p 5000:5000 tushardubey/weather_app:latest
+            "
 
-                ssh -o StrictHostKeyChecking=no ubuntu@3.84.227.187"
-                    docker pull tushardubey/weather_app:latest &&
-                    docker stop weather_app || true &&
-                    docker rm weather_app || true &&
-                    docker run -d --name weather_app -p 5000:5000 tushardubey/weather_app:latest
-                    "
-                '''
-            }
+            ssh -o StrictHostKeyChecking=no ubuntu@3.84.227.187 "
+              docker pull tushardubey/weather_app:latest &&
+              docker stop weather_app || true &&
+              docker rm weather_app || true &&
+              docker run -d --name weather_app -p 5000:5000 tushardubey/weather_app:latest
+            "
+          '''
         }
+      }
     }
-
-    
   }
 
   post {
