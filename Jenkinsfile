@@ -1,48 +1,54 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')  // set in Jenkins
-        IMAGE_NAME = "tushardubey/weather_app"
+  environment {
+    IMAGE_NAME = "tushardubey/weather_app"
+    # Replace <SECOND_EC2_IP> with your second instance public or private IP
+    SERVERS = "ubuntu@3.80.218.77 ubuntu@3.84.227.187"
+  }
+
+  stages {
+    stage('Build') {
+      steps {
+        sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+        sh "docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest"
+      }
     }
 
-    stages {
-        stage('Build Image') {
-            steps {
-                sh """
-                    docker build -t $IMAGE_NAME:\$BUILD_NUMBER .
-                """
-            }
+    stage('Push') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                                         usernameVariable: 'DH_USER',
+                                         passwordVariable: 'DH_PASS')]) {
+          sh '''
+            echo "${DH_PASS}" | docker login -u "${DH_USER}" --password-stdin
+            docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+            docker push ${IMAGE_NAME}:latest
+          '''
         }
-
-        stage('Push to DockerHub') {
-            steps {
-                sh """
-                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                    docker push $IMAGE_NAME:\$BUILD_NUMBER
-                    docker tag $IMAGE_NAME:\$BUILD_NUMBER $IMAGE_NAME:latest
-                    docker push $IMAGE_NAME:latest
-                """
-            }
-        }
-
-        stage('Deploy to EC2s') {
-            steps {
-                sh """
-                    ssh -o StrictHostKeyChecking=no ubuntu@<EC2_PUBLIC_IP> '
-                        docker pull $IMAGE_NAME:latest &&
-                        docker stop weather_app || true &&
-                        docker rm weather_app || true &&
-                        docker run -d --name weather_app -p 80:80 $IMAGE_NAME:latest
-                    '
-                """
-            }
-        }
+      }
     }
 
-    post {
-        always {
-            sh 'docker image prune -f'
+    stage('Deploy to EC2s') {
+      steps {
+        sshagent(['ssh-ec2']) {
+          script {
+            for (srv in env.SERVERS.split()) {
+              sh """
+                ssh -o StrictHostKeyChecking=no ${srv} '
+                  docker pull ${IMAGE_NAME}:latest &&
+                  docker rm -f weather_app || true &&
+                  docker run -d --name weather_app --restart always -p 80:5000 ${IMAGE_NAME}:latest
+                '
+              """
+            }
+          }
         }
+      }
     }
+  }
+
+  post {
+    always { sh 'docker image prune -f || true' }
+  }
 }
