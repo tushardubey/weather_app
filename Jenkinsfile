@@ -3,7 +3,6 @@ pipeline {
 
   environment {
     IMAGE_NAME = "tushardubey/weather_app"
-    # Replace <SECOND_EC2_IP> with your second instance public or private IP
     SERVERS = "ubuntu@3.80.218.77 ubuntu@3.84.227.187"
   }
 
