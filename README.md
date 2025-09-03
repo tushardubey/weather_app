@@ -53,13 +53,41 @@ The application fetches live weather data from OpenWeather API and stores result
 
 ## 🛠 Issues Faced & Fixes
 
-1. 502/504 Gateway errors → fixed Gunicorn/Nginx config
+1. Container-Nginx-Gunicorn Integration Issues
 
-2. S3 access denied → fixed IAM & bucket policy
+Challenge: Flask app containers were running, but Nginx wasn’t forwarding requests correctly, resulting in gateway errors.
 
-3. Jenkins Git error → installed Git on server
+Resolution: Reconfigured Nginx reverse proxy and Gunicorn socket binding inside Docker Compose, tested with health checks, and validated end-to-end communication.
 
-4. SSH failures → corrected Security Group inbound rules
+2. Cross-Region S3 Replication Not Triggering
+
+Challenge: Data wasn’t appearing in the backup region bucket despite replication rules being configured.
+
+Resolution: Debugged IAM replication role, enabled bucket versioning, and applied correct replication policy. After fixing, replication worked as expected.
+
+3. DNS Failover Delay
+
+Challenge: Route 53 failover was not instant — traffic continued hitting the unhealthy primary region.
+
+Resolution: Tuned DNS TTL values and configured Route 53 health checks with proper ALB endpoints to reduce propagation time during failover.
+
+4. Jenkins Deployment Pipeline Failures
+
+Challenge: Jenkins pipeline was failing while building and deploying Docker containers due to permission and workspace issues on EC2.
+
+Resolution: Configured Jenkins with proper SSH keys, installed Docker on Jenkins agents, and used docker-compose in pipeline stages to standardize deployment.
+
+5. Auto Scaling Health Check Mismatches
+
+Challenge: Auto Scaling was terminating healthy containers because the ALB health check path wasn’t aligned with the Flask route.
+
+Resolution: Adjusted ALB health check to /health endpoint and added a lightweight health-check route in the Flask app.
+
+6. Application Downtime After EC2 Reboot
+
+Challenge: After EC2 restarts, the app wasn’t auto-starting, causing service downtime.
+
+Resolution: Configured systemd services with Restart=always for Docker Compose stack, ensuring containers auto-start on reboot.
 
 ## 🔮 Future Enhancements
 
