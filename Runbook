@@ -1,0 +1,23 @@
+# 📑 Documentation – *Issues & Fixes*
+
+### Common Issues & Fixes
+1. **Nginx → 502/504 Bad Gateway**  
+   - Issue: Gunicorn socket misconfigured.  
+   - Fix: Corrected `ExecStart` in `weather.service` + reloaded systemd.  
+
+2. **S3 Access Denied**  
+   - Issue: Incorrect bucket policy.  
+   - Fix: Attached IAM replication role with full S3 access.  
+
+3. **Jenkins Git Error**  
+   - Issue: Git not installed.  
+   - Fix: Installed Git & updated Jenkins config.  
+
+4. **SSH Failure**  
+   - Issue: Security group blocked port 22.  
+   - Fix: Added SSH inbound rule.  
+
+5. **App not restarting after reboot**  
+   - Fix: Created systemd service to auto-start Gunicorn.  
+
+---
