@@ -42,13 +42,13 @@
 - Nginx access/error logs
 - CloudWatch metrics/alarms (optional but recommended).
 
-## Issues Faced & Fixes
-
-- **Nginx 502/504**: Upstream mis-bind. Ensured app listens on 0.0.0.0:8000 and Nginx proxy to that address. Increased proxy timeouts.
-- **S3 AccessDenied**: Missing permissions. Attached replication role, verified bucket policies, enabled versioning before CRR.
-- **Jenkins Git SCM**: "Selected Git installation does not exist" -> Installed Git on Jenkins, configured Global Tool.
-- **SSH Blocked**: Security group changes removed port 22 -> Re-added inbound rule for SSH.
-- **Service on Reboot**: Use Docker restart=always; previously also tried `systemd` for Gunicorn on host.
+## Issues Faced
+- Container-Nginx-Gunicorn Integration Issues
+- Cross-Region S3 Replication Not Triggering
+- DNS Failover Delay
+- Jenkins Deployment Pipeline Failures
+- Auto Scaling Health Check Mismatches
+- Application Downtime After EC2 Reboot
 
 ## DR Drill Checklist
 1. Confirm health checks GREEN in Route 53.
@@ -63,4 +63,3 @@
 - Orchestration: ECS/EKS with multi-AZ/multi-region.
 - TLS: ACM certs on ALB (or Nginx) + HTTP->HTTPS redirect.
 - CDN + WAF: CloudFront in front of Route 53/ALB with WAF rules.
-- Monitoring: CloudWatch alarms, Grafana dashboards, synthetic canaries.
