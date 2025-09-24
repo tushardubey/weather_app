@@ -1,0 +1,94 @@
+📄 Project Report – Multi-Region Disaster Recovery Weather Application
+1. Introduction
+
+The Weather App Multi-Region Disaster Recovery Project demonstrates how a real-world application can be made highly available, fault tolerant, and disaster-resilient using AWS services. The project uses Flask (Python) as the application framework, deployed on EC2 instances, with multi-region failover achieved through Route 53, S3 cross-region replication, and RDS Multi-AZ.
+
+The app fetches live weather data via OpenWeather API and stores processed data in Amazon S3 for persistence.
+
+2. Objectives
+
+Deploy a Flask-based weather application on AWS EC2.
+
+Ensure high availability using Auto Scaling + ALB.
+
+Implement disaster recovery across multiple AWS regions.
+
+Automate deployments with Jenkins CI/CD.
+
+Store weather data in S3 with cross-region replication.
+
+3. Achievements
+
+✅ Deployed Flask app on EC2 with Nginx + Gunicorn.
+✅ Configured S3 buckets with cross-region replication.
+✅ Implemented Route 53 DNS failover policy (primary → backup).
+✅ Set up ALB + Auto Scaling Group for primary region.
+✅ Configured RDS Multi-AZ (ensuring DB resilience).
+✅ Integrated Jenkins CI/CD pipeline for automated builds & deployments.
+✅ Successfully tested failover by shutting down primary region EC2 – traffic automatically routed to backup region.
+
+4. Steps Taken
+
+App Setup
+
+Flask app developed with OpenWeather API integration.
+
+Gunicorn + Nginx setup for production.
+
+Infrastructure Setup (Primary Region – ap-south-1)
+
+Created EC2 instances (Ubuntu) for app hosting.
+
+Installed dependencies (Python, Gunicorn, Nginx).
+
+Created S3 bucket for data storage.
+
+Configured RDS (Multi-AZ).
+
+Set up ALB + Auto Scaling Group.
+
+Disaster Recovery Setup (Backup Region – us-east-1)
+
+Created backup EC2 instance with same Flask app.
+
+Configured S3 cross-region replication.
+
+Created failover Route 53 DNS policy.
+
+CI/CD Pipeline
+
+Jenkins job pulling code from GitHub repo.
+
+Build & deployment automated to EC2.
+
+Testing
+
+Stopped primary region → backup served app successfully.
+
+Validated S3 replication by checking both buckets.
+
+5. Issues Faced & Resolutions
+
+502/504 Gateway Errors → Fixed by checking Nginx + Gunicorn logs, corrected socket binding.
+
+S3 “Access Denied” error → Resolved by applying correct IAM bucket policies & enabling replication role.
+
+Jenkins Git SCM error (Selected Git installation does not exist) → Installed Git on Jenkins server & updated Jenkins config.
+
+SSH connection failures → Fixed by correcting Security Group rules (port 22 inbound).
+
+App downtime after instance restart → Created systemd service for Gunicorn (weather.service).
+
+6. Future Enhancements
+
+Use Terraform to automate infrastructure provisioning.
+
+Implement CloudFront + WAF for security & caching.
+
+Replace EC2 with ECS/EKS for containerized deployment.
+
+Add Monitoring + Alerts with CloudWatch, Grafana, Prometheus.
+
+Implement Blue-Green or Canary Deployments.
+
+Store weather data in DynamoDB for faster lookups.
